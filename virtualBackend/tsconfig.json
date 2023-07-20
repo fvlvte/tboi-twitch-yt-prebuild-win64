@@ -1,0 +1,8 @@
+{
+    "include": ["src/**/*"],
+    "exclude": ["node_modules", "helpers"],
+    "compilerOptions": {
+        "outDir": "dist",
+    },
+    "extends": "@tsconfig/node20/tsconfig.json"
+}
