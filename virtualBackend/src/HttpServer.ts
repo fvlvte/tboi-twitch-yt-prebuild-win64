@@ -1,6 +1,5 @@
 import { default as express } from "express";
 import * as http from "http";
-import { default as bodyParser } from "body-parser";
 import * as cors from "cors";
 import { HttpStatusCode } from "axios";
 import { ObjectManager } from "./ObjectManager";
@@ -42,7 +41,7 @@ export class HttpServer {
           1 + 1;
         });
       };
-      this.messageStore[req.query.ytid as string] = [];
+      this.messageStore[req.query.ytId as string] = [];
 
       const page = await (
         ObjectManager.getInstance().getObject(
@@ -50,7 +49,7 @@ export class HttpServer {
         ) as BrowserManager
       ).spawnBlankPage(cc as any);
 
-      new YoutubeLajtScraper(page).initOnYoutubeLajt(req.query.ytid as string);
+      new YoutubeLajtScraper(page).initOnYoutubeLajt(req.query.ytId as string);
 
       res.status(HttpStatusCode.NoContent).send();
     } catch (e) {
@@ -66,8 +65,8 @@ export class HttpServer {
     try {
       res
         .status(HttpStatusCode.Ok)
-        .send({ items: this.messageStore[req.query.ytid as string] });
-      this.messageStore[req.query.ytid as string] = [];
+        .send({ items: this.messageStore[req.query.ytId as string] });
+      this.messageStore[req.query.ytId as string] = [];
     } catch (e) {
       console.error(e);
       res.status(HttpStatusCode.InternalServerError).send(JSON.stringify(e));
@@ -76,14 +75,13 @@ export class HttpServer {
 
   public async init(port?: number): Promise<void> {
     this.app.options("*", cors.default());
-    this.app.use(bodyParser.json());
     this.app.use(cors.default());
 
     this.app.get("/pop", this.handleGetArray.bind(this));
     this.app.get("/init", this.handleYoutubeInit.bind(this));
     this.app.use(
       "/frontend",
-      express.static("../IsaacOnTwitchReloaded-site-YTFix/dist")
+      express.static("../frontendPrebuilt", { index: "index.html" })
     );
 
     this.server = this.app.listen(port);
