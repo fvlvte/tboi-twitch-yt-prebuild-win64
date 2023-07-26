@@ -7,12 +7,12 @@ const PORT = process.env.TBOI_BRIDGE_PORT
 
 async function initApp(): Promise<void> {
   console.log(
-    "The binding of gruby ryfek się odpala ok poczekaj chwile ok ...",
+    "The binding of gruby ryfek się odpala ok poczekaj chwile ok ...",
   );
 
   try {
     console.log("Ładuje se menago przeglondarek ok czekaj dalej ok ...");
-    BrowserManager.getInstance().init();
+    await BrowserManager.getInstance().init();
     console.log(
       "Załadowałem se menago przeglondarek ok udało sie ok!!!!!!!!!!",
     );
@@ -26,7 +26,7 @@ async function initApp(): Promise<void> {
 
   try {
     console.log("Ładuje se bridge server ok czekaj ok ...");
-    HttpServer.getInstance().init(PORT);
+    await HttpServer.getInstance().init(PORT);
     console.log(
       `Załadowałem se bridge server ok na porcie ${PORT} ok!!!!!!!!!!`,
     );
