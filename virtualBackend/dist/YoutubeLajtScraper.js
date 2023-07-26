@@ -1,8 +1,9 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.YoutubeLajtScraper = void 0;
-const ObjectManager_1 = require("./ObjectManager");
 const HttpServer_1 = require("./HttpServer");
+const YT_CHAT_SWITCH_SELECTOR = "yt-icon[icon='expand']";
+const YT_LIVE_CHAT_SELECTOR = "tp-yt-paper-listbox[id='menu'] a[aria-selected='false'] tp-yt-paper-item tp-yt-paper-item-body";
 class YoutubeLajtScraper {
     page;
     ytId = "";
@@ -27,7 +28,7 @@ class YoutubeLajtScraper {
                         }
                     }
                     catch (e) { }
-                    ObjectManager_1.ObjectManager.getInstance().getObject(HttpServer_1.HttpServer.name).putMessage(this.ytId, {
+                    HttpServer_1.HttpServer.getInstance().putMessage(this.ytId, {
                         channelId: i.authorExternalChannelId || i.authorName.simpleText,
                         authorName: i.authorName.simpleText,
                         msgContent: "$$SYS_MEMBER$$",
@@ -42,7 +43,7 @@ class YoutubeLajtScraper {
                     const chid = i.authorExternalChannelId;
                     const msg = i.message.runs[0].text;
                     if (typeof msg !== "undefined") {
-                        ObjectManager_1.ObjectManager.getInstance().getObject(HttpServer_1.HttpServer.name).putMessage(this.ytId, {
+                        HttpServer_1.HttpServer.getInstance().putMessage(this.ytId, {
                             channelId: chid,
                             authorName: i.authorName.simpleText,
                             msgContent: msg,
@@ -64,9 +65,19 @@ class YoutubeLajtScraper {
         }
     }
     async initOnYoutubeLajt(lajtId) {
+        if (typeof lajtId !== "string")
+            throw new Error("lajtId is not a string");
+        if (lajtId.length === 0)
+            throw new Error("lajtId is empty");
         this.ytId = lajtId;
         this.page.on("response", this.onRequest.bind(this));
         await this.page.goto(`https://www.youtube.com/live_chat?is_popout=1&v=${lajtId}`);
+        await this.page.waitForSelector(YT_CHAT_SWITCH_SELECTOR);
+        await this.page.click(YT_CHAT_SWITCH_SELECTOR);
+        await this.page.waitForSelector(YT_LIVE_CHAT_SELECTOR);
+        await this.page.evaluate(`
+      document.querySelector("${YT_LIVE_CHAT_SELECTOR}").click();
+    `);
     }
 }
 exports.YoutubeLajtScraper = YoutubeLajtScraper;

@@ -30,17 +30,22 @@ exports.HttpServer = void 0;
 const express_1 = __importDefault(require("express"));
 const cors = __importStar(require("cors"));
 const axios_1 = require("axios");
-const ObjectManager_1 = require("./ObjectManager");
 const BrowserManager_1 = require("./BrowserManager");
 const YoutubeLajtScraper_1 = require("./YoutubeLajtScraper");
 class HttpServer {
     app;
     server;
     messageStore = {};
+    static instance;
+    static getInstance() {
+        if (!HttpServer.instance) {
+            HttpServer.instance = new HttpServer();
+        }
+        return HttpServer.instance;
+    }
     constructor() {
         this.app = (0, express_1.default)();
         this.server = null;
-        ObjectManager_1.ObjectManager.getInstance().registerObject(this.constructor.name, this);
     }
     putMessage(id, message) {
         this.messageStore[id].push(message);
@@ -57,13 +62,8 @@ class HttpServer {
     }
     async handleYoutubeInit(req, res) {
         try {
-            const cc = async () => {
-                return new Promise(() => {
-                    1 + 1;
-                });
-            };
             this.messageStore[req.query.ytId] = [];
-            const page = await ObjectManager_1.ObjectManager.getInstance().getObject(BrowserManager_1.BrowserManager.name).spawnBlankPage(cc);
+            const page = await BrowserManager_1.BrowserManager.getInstance().spawnBlankPage();
             new YoutubeLajtScraper_1.YoutubeLajtScraper(page).initOnYoutubeLajt(req.query.ytId);
             res.status(axios_1.HttpStatusCode.NoContent).send();
         }
